@@ -1,0 +1,44 @@
+name: MLOps Pipeline
+
+on:
+  push:
+    branches: [ "main" ]
+jobs:
+  mlops:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout do código
+      uses: actions/checkout@v3
+
+    - name: Configurar Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: "3.10"
+
+    - name: Instalar dependências
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
+
+    - name: Executar testes
+      run: pytest
+
+    - name: validar dados
+      run: python src/validate_data.py
+
+    - name: Treinar modelo
+      run: python src/train.py
+
+    - name: Avaliar modelo
+      run: python src/evaluate.py
+
+    - name: publicar artefatos
+      uses: actions/upload-artifact@v4
+      with:
+        name: modelo-treinado
+        path: |
+          model.joblib
+          metrics.json
+
+    
